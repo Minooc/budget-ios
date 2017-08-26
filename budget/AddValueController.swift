@@ -19,6 +19,7 @@ class AddValueController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var desField: UITextField!
     @IBOutlet weak var valField: UITextField!
     
+    var hasDot = false;
     var type = "Income"
     var totalIncome: [String:Double] = [:]
     var totalExpense: [String:Double] = [:]
@@ -40,7 +41,7 @@ class AddValueController: UIViewController, UITextFieldDelegate {
             initialize2 = true
         }
         valField.delegate = self
-        valField.keyboardType = .numberPad
+        valField.keyboardType = .decimalPad
         
         valueLbl.text = "0"
 
@@ -92,7 +93,17 @@ class AddValueController: UIViewController, UITextFieldDelegate {
     
     // Do not accept any string outside 0 and 9. Source: http://stackoverflow.com/questions/26919854/how-can-i-declare-that-a-text-field-can-only-contain-an-integerd
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let invalidCharacters = CharacterSet(charactersIn: "0123456789").inverted
+        
+        var availableCharacters = "0123456789"
+        if (valField.text != "" && hasDot == false) {
+            availableCharacters += "."
+        }
+        if (valField.text?.characters.contains("."))! {
+            hasDot = false
+            availableCharacters = "0123456789"
+        }
+        
+        let invalidCharacters = CharacterSet(charactersIn: availableCharacters).inverted
         return string.rangeOfCharacter(from: invalidCharacters, options: [], range: string.startIndex ..< string.endIndex) == nil
     }
 

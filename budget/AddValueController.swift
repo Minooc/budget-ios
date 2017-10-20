@@ -92,7 +92,7 @@ class AddValueController: UIViewController, UITextFieldDelegate {
     @IBAction func submitPressed(_ sender: Any) {
         
         if (desField.text != "" && valField.text != "") {
-            let budget = budgetData()
+            let budget = budgetData(des: "", val: "")
             
             budget.configureCell(valField: valField.text!, desField: desField.text!)
             desField.text = ""
@@ -104,6 +104,8 @@ class AddValueController: UIViewController, UITextFieldDelegate {
             } else if (type == "Expense") {
                 Manager.instance.addExpense(currentMonth: currentMonth, expense: budget)
             }
+            
+            Manager.instance.saveData()
             
             performSegue(withIdentifier: "AddValue", sender: budget)
             

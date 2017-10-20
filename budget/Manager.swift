@@ -11,7 +11,7 @@ class Manager {
 
     func initializeData() {
         
-//        if !FileManager.default.fileExists(atPath: getFilePath() as String) {
+        if !FileManager.default.fileExists(atPath: getFilePath() as String) {
             // set up our game with initial values
             data = Data()
             
@@ -28,20 +28,20 @@ class Manager {
             print("good")
             
             
-//            saveData()
-//        }
-//
-//        loadData()
+            saveData()
+        }
+
+        loadData()
     }
     
     func loadData() {
-       // data = NSKeyedUnarchiver.unarchiveObject(withFile: getFilePath() as String) as? Data
+        data = NSKeyedUnarchiver.unarchiveObject(withFile: getFilePath() as String) as? Data
         
     }
     
     func saveData() {
         if data != nil {
-       //     NSKeyedArchiver.archiveRootObject(data!, toFile: getFilePath() as String)
+            NSKeyedArchiver.archiveRootObject(data!, toFile: getFilePath() as String)
         }
     }
     
@@ -52,46 +52,7 @@ class Manager {
         return url!.appendingPathComponent("Manager").path
     }
     
-    
-//    func syncIncomeArray(income: [String: [budgetData]]) {
-//
-//        for month in months {
-//
-//            let storedBudgetList = income[month]!
-//
-//            if (storedBudgetList.count > 0) {
-//            for i in 0...storedBudgetList.count-1 {
-//                let budget = (storedBudgetList[i]._desField, storedBudgetList[i]._valField)
-//                self.data?.incomeDictionary[month]?.append(budget)
-//            }
-//            }
-//        }
-//
-//    }
-//
-//    func syncExpenseArray(expense: [String: [budgetData]]) {
-//        for month in months {
-//
-//            let storedBudgetList = expense[month]!
-//
-//            if (storedBudgetList.count > 0) {
-//            for i in 0...storedBudgetList.count-1 {
-//                let budget = (storedBudgetList[i]._desField, storedBudgetList[i]._valField)
-//                self.data?.expenseDictionary[month]?.append(budget)
-//            }
-//
-//            }
-//        }
-//    }
 
-//    func getIncomeArray() -> [String: [budgetData]] {
-//        return (self.data?.incomeArray)!
-//    }
-//
-//    func getExpenseArray() -> [String: [budgetData]] {
-//        return (self.data?.expenseArray)!
-//    }
-//
     func setTotalIncome(totalIncome: Double, currentMonth: String) {
         self.data?.totalIncome[currentMonth] = totalIncome
     }

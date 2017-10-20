@@ -5,9 +5,11 @@ class Data: NSObject, NSCoding {
     struct Keys {
         // we use keys to store values
         
-        static let incomeDictionary = "IncomeDictionary"
-        static let expenseDictionary = "ExpenseDictionary"
-        
+//        static let incomeDictionary = "IncomeDictionary"
+//        static let expenseDictionary = "ExpenseDictionary"
+    
+        static let incomeArray = "IncomeArray"
+        static let expenseArray = "ExpenseArray"
         
         static let totalIncome = "TotalIncome"
         static let totalExpense = "TotalExpense"
@@ -21,8 +23,8 @@ class Data: NSObject, NSCoding {
     var incomeArray = [String:[budgetData]]()
     var expenseArray = [String:[budgetData]]()
     
-    var incomeDictionary = [String:[(String, String)]]()
-    var expenseDictionary = [String:[(String, String)]]()
+//    var incomeDictionary = [String:[(String, String)]]()
+//    var expenseDictionary = [String:[(String, String)]]()
     
     var totalIncome = [String:Double]()
     var totalExpense = [String:Double]()
@@ -38,12 +40,12 @@ class Data: NSObject, NSCoding {
         super.init()
 
 
-        if let incomeDict = aDecoder.decodeObject(forKey: Keys.incomeDictionary) as? [String:[(String, String)]] {
-            self.incomeDictionary = incomeDict
+        if let incomeDict = aDecoder.decodeObject(forKey: Keys.incomeArray) as? [String:[budgetData]] {
+            self.incomeArray = incomeDict
         }
 
-        if let expenseDict = aDecoder.decodeObject(forKey: Keys.expenseDictionary) as? [String:[(String, String)]] {
-            self.expenseDictionary = expenseDict
+        if let expenseDict = aDecoder.decodeObject(forKey: Keys.expenseArray) as? [String:[budgetData]] {
+            self.expenseArray = expenseDict
         }
 
         
@@ -65,8 +67,8 @@ class Data: NSObject, NSCoding {
     
     func encode(with aCoder: NSCoder) {
         
-        aCoder.encode(self.incomeDictionary, forKey: Keys.incomeDictionary)   // not working
-        aCoder.encode(self.expenseDictionary, forKey: Keys.expenseDictionary) // not working
+        aCoder.encode(self.incomeArray, forKey: Keys.incomeArray)   // not working
+        aCoder.encode(self.expenseArray, forKey: Keys.expenseArray) // not working
         
         aCoder.encode(self.totalIncome, forKey: Keys.totalIncome)
         aCoder.encode(self.totalExpense, forKey: Keys.totalExpense)

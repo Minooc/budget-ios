@@ -32,14 +32,12 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if !initialize {
-            Manager.instance.initializeData()
-            initialize = true
-        }
-        
+        Manager.instance.initializeData()
+
         monthPickerBtn.setTitle(currentMonth, for: .normal)
         currentMonthLbl.text = "Available Budget in \(currentMonth):"
         
+        print(Manager.instance.getTotalIncome(currentMonth: currentMonth))
         
         monthPicker.delegate = self
         monthPicker.dataSource = self
@@ -51,6 +49,8 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         expenseTableView.dataSource = self
         
         updateBudgetView()
+        
+        Manager.instance.saveData()
     }
     
     
@@ -181,6 +181,8 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
                 expenseTableView.reloadData()
             }
             
+            Manager.instance.saveData()
+            
             updateBudgetView()
             
         }
@@ -202,8 +204,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     // Calculate budget
     
     func calculateBudget(thisBudget: budgetData) {
-        
-        print(thisBudget._valField)
+    
         
         if (type == "Income") {
             var newIncome = Manager.instance.getTotalIncome(currentMonth: currentMonth)
@@ -225,6 +226,8 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
 
         newTotalBudget = round(newTotalBudget * 100) / 100
         Manager.instance.setTotalBudget(totalBudget: newTotalBudget, currentMonth: currentMonth)
+        
+        Manager.instance.saveData()
 
         
     }
@@ -249,6 +252,8 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         newTotalBudget = round(newTotalBudget * 100) / 100
         
         Manager.instance.setTotalBudget(totalBudget: newTotalBudget, currentMonth: currentMonth)
+        
+        Manager.instance.saveData()
         
         
     }

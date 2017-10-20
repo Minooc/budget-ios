@@ -9,7 +9,7 @@
 import Foundation
 
 class budgetData {
-    
+
     var _desField: String = ""
     var _valField: String = ""
     
@@ -28,9 +28,5 @@ class budgetData {
         let roundedValField = round(Double(valField)! * 100)/100
         self._valField = "\(roundedValField)"
     }
-    
-//    var name: String
-//    var value: String
-    
     
 }

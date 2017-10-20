@@ -5,14 +5,13 @@
 //  Created by Minooc Choo on 8/22/17.
 //  Copyright © 2017 Minooc Choo. All rights reserved.
 //
-
 import UIKit
 
 var initialize2 = false
 
 class AddValueController: UIViewController, UITextFieldDelegate {
-
-
+    
+    
     @IBOutlet weak var bgView: UIView!
     @IBOutlet weak var valueLbl: UILabel!
     
@@ -21,42 +20,24 @@ class AddValueController: UIViewController, UITextFieldDelegate {
     
     var hasDot = false;
     var type = "Income"
-    var totalIncome: [String:Double] = [:]
-    var totalExpense: [String:Double] = [:]
-    var totalBudget: [String:Double] = [:]
-    
-    var budgetArray: [Double] = []
     
     var currentMonth = "January"
     var month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     
-    var incomeArray: [String:[budgetData]] = [:]
-    var expenseArray: [String:[budgetData]] = [:]
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if (initialize2 == false) {
-            initailizeData()
-            initialize2 = true
-        }
+
         valField.delegate = self
         valField.keyboardType = .decimalPad
         
         valueLbl.text = "0"
-
+        
     }
     
-    func initailizeData() {
-        for i in 0...month.count-1 {
-            incomeArray[month[i]] = []
-            expenseArray[month[i]] = []
-            totalIncome[month[i]] = 0.0
-            totalExpense[month[i]] = 0.0
-            totalBudget[month[i]] = 0.0
-        }
-    }
-   
+
+
     @IBAction func editValue(_ sender: Any) {
         if (type == "Income") {
             valueLbl.text = "+" + valField.text!
@@ -68,7 +49,7 @@ class AddValueController: UIViewController, UITextFieldDelegate {
             valueLbl.text = "0"
         }
     }
-
+    
     @IBAction func cancelPressed(_ sender: UIBarButtonItem) {
         self.dismiss(animated: true, completion: nil)
     }
@@ -81,7 +62,7 @@ class AddValueController: UIViewController, UITextFieldDelegate {
             valueLbl.text = "+" + valField.text!
         }
     }
-
+    
     @IBAction func expenseBtnPressed(_ sender: Any) {
         bgView.backgroundColor = UIColor(red: 255/255, green: 112/255, blue: 103/255, alpha: 0.8)
         type = "Expense"
@@ -106,7 +87,7 @@ class AddValueController: UIViewController, UITextFieldDelegate {
         let invalidCharacters = CharacterSet(charactersIn: availableCharacters).inverted
         return string.rangeOfCharacter(from: invalidCharacters, options: [], range: string.startIndex ..< string.endIndex) == nil
     }
-
+    
     
     @IBAction func submitPressed(_ sender: Any) {
         
@@ -118,37 +99,29 @@ class AddValueController: UIViewController, UITextFieldDelegate {
             valField.text = ""
             
             if (type == "Income") {
-                self.incomeArray[currentMonth]!.append(budget)
+                Manager.instance.addIncome(currentMonth: currentMonth, income: budget)
+                
             } else if (type == "Expense") {
-                self.expenseArray[currentMonth]!.append(budget)
+                Manager.instance.addExpense(currentMonth: currentMonth, expense: budget)
             }
             
             performSegue(withIdentifier: "AddValue", sender: budget)
-
+            
             
         }
         
     }
- 
+    
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "AddValue" {
             if let detailsVC = segue.destination as? ViewController {
                 if let budget = sender as? budgetData {
                     
-                    detailsVC.incomeArray = self.incomeArray
-                    detailsVC.expenseArray = self.expenseArray
-                    detailsVC.type = self.type
-                    detailsVC.currentMonth = self.currentMonth
-                    
-                    detailsVC.totalIncome = self.totalIncome
-                    detailsVC.totalExpense = self.totalExpense
-                    detailsVC.totalBudget = self.totalBudget
-                    
-                    budgetArray = detailsVC.calculateBudget(thisBudget: budget)
-                    totalIncome[currentMonth] = budgetArray[0]
-                    totalExpense[currentMonth] = budgetArray[1]
-                    totalBudget[currentMonth] = budgetArray[2]
+                      detailsVC.type = self.type
+                      detailsVC.currentMonth = self.currentMonth
+
+                      detailsVC.calculateBudget(thisBudget: budget)
                     
                 }
             }
@@ -156,5 +129,5 @@ class AddValueController: UIViewController, UITextFieldDelegate {
         
     }
     
-
+    
 }

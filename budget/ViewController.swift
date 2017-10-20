@@ -5,13 +5,12 @@
 //  Created by Minooc Choo on 8/20/17.
 //  Copyright © 2017 Minooc Choo. All rights reserved.
 //
-
 import UIKit
 
 var initialize = false
 
 class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource , UITableViewDataSource, UITableViewDelegate {
-
+    
     @IBOutlet weak var totalExpenseLbl: UILabel!
     @IBOutlet weak var totalIncomeLbl: UILabel!
     @IBOutlet weak var totalBudgetLbl: UILabel!
@@ -20,35 +19,26 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     @IBOutlet weak var currentMonthLbl: UILabel!
     @IBOutlet weak var incomeTableView: UITableView!
     @IBOutlet weak var expenseTableView: UITableView!
-
-
+    
+    
     var budgetdata: budgetData!
     
-    var incomeArray: [String:[budgetData]] = [:]
-    var expenseArray: [String:[budgetData]] = [:]
-    
     var type = ""
-    var totalIncome: [String:Double] = [:]
-    var totalExpense: [String:Double] = [:]
-    var totalBudget: [String:Double] = [:]
     
-
     var currentMonth = "January"
     var month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if !initialize {
+            Manager.instance.initializeData()
+            initialize = true
+        }
         
         monthPickerBtn.setTitle(currentMonth, for: .normal)
         currentMonthLbl.text = "Available Budget in \(currentMonth):"
-        
-        if initialize == false {
-            // Perform an action that will only be done once
-            initailizeData()
-            initialize = true
-        }
         
         
         monthPicker.delegate = self
@@ -59,20 +49,11 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         
         expenseTableView.delegate = self
         expenseTableView.dataSource = self
-
+        
         updateBudgetView()
     }
     
-    func initailizeData() {
-        for i in 0...month.count-1 {
-            incomeArray[month[i]] = []
-            expenseArray[month[i]] = []
-            totalIncome[month[i]] = 0.0
-            totalExpense[month[i]] = 0.0
-            totalBudget[month[i]] = 0.0
-        }
-    }
-
+    
     
     
     /* UI Picker View */
@@ -95,7 +76,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         return month[row]
     }
     
-
+    
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         monthPickerBtn.setTitle(month[row], for: UIControlState.normal)
         monthPicker.isHidden = true
@@ -118,12 +99,14 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if (tableView.isEqual(incomeTableView)) {
-            return incomeArray[currentMonth]!.count
+            let incArray = Manager.instance.getIncomeArray(currentMonth: currentMonth)
+            return incArray.count
         } else {
-            return expenseArray[currentMonth]!.count
+            let expArray = Manager.instance.getExpenseArray(currentMonth: currentMonth)
+            return expArray.count
         }
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         if (tableView.isEqual(incomeTableView)) {
@@ -131,30 +114,36 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
             if let cell = tableView.dequeueReusableCell(withIdentifier: "incomeTableCell", for: indexPath) as? IncomeTableCell {
                 
                 let budget: budgetData!
-                let x = incomeArray[currentMonth]
-                budget = x?[indexPath.row]
+                let x = Manager.instance.getIncomeArray(currentMonth: currentMonth)
+            
+                if (!x.isEmpty) {
+                budget = x[indexPath.row]
                 cell.configure(budget: budget)
+                }
                 
                 return cell
             } else {
                 return UITableViewCell()
             }
-
+        
         } else {
-            
+
             if let cell = tableView.dequeueReusableCell(withIdentifier: "expenseTableCell", for: indexPath) as? ExpenseTableCell {
-                
+
                 var budget: budgetData!
-                let x = expenseArray[currentMonth]
-                budget = x?[indexPath.row]
-                cell.configure(budget: budget)
-                
+                let x = Manager.instance.getExpenseArray(currentMonth: currentMonth)
+
+                if (!x.isEmpty) {
+                    budget = x[indexPath.row]
+                    cell.configure(budget: budget)
+                }
+
                 return cell
             } else {
                 return UITableViewCell()
             }
         }
-    
+        
         
     }
     
@@ -172,26 +161,28 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
             if (tableView.dequeueReusableCell(withIdentifier: "incomeTableCell") as? IncomeTableCell) != nil {
                 type = "Income"
                 
-                let x = incomeArray[currentMonth]!
+                let x = Manager.instance.getIncomeArray(currentMonth: currentMonth)
                 let budget = x[indexPath.row]
                 subtractBudget(thisBudget: budget)
-                incomeArray[currentMonth]!.remove(at: indexPath.item)
+                
+                Manager.instance.removeIncome(currentMonth: currentMonth, indexPath: indexPath)
                 incomeTableView.reloadData()
-
-
+                
+                
             }
             else if (tableView.dequeueReusableCell(withIdentifier: "expenseTableCell") as? ExpenseTableCell) != nil {
                 type = "Expense"
                 
-                let x = expenseArray[currentMonth]!
+                let x = Manager.instance.getExpenseArray(currentMonth: currentMonth)
                 let budget = x[indexPath.row]
                 subtractBudget(thisBudget: budget)
-                expenseArray[currentMonth]!.remove(at: indexPath.item)
+                
+                Manager.instance.removeExpense(currentMonth: currentMonth, indexPath: indexPath)
                 expenseTableView.reloadData()
             }
             
             updateBudgetView()
-
+            
         }
     }
     
@@ -202,12 +193,6 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let nextVC = segue.destination as? AddValueController
-        nextVC?.incomeArray = self.incomeArray
-        nextVC?.expenseArray = self.expenseArray
-        
-        nextVC?.totalIncome = self.totalIncome
-        nextVC?.totalExpense = self.totalExpense
-        nextVC?.totalBudget = self.totalBudget
         
         nextVC?.currentMonth = self.currentMonth
     }
@@ -216,48 +201,54 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     
     // Calculate budget
     
-    func calculateBudget(thisBudget: budgetData) -> [Double] {
+    func calculateBudget(thisBudget: budgetData) {
+        
+        print(thisBudget._valField)
         
         if (type == "Income") {
-            var newIncome = totalIncome[currentMonth]!
-            newIncome += Double(thisBudget.valField)!
+            var newIncome = Manager.instance.getTotalIncome(currentMonth: currentMonth)
+            newIncome = newIncome + Double(thisBudget.valField)!
             newIncome = round(newIncome * 100) / 100
-            totalIncome.updateValue(newIncome, forKey: currentMonth)
-
-
+            print(currentMonth)
+            Manager.instance.setTotalIncome(totalIncome: newIncome, currentMonth: currentMonth)
+            
+            
         } else if (type == "Expense") {
-            var newExpense = totalExpense[currentMonth]!
+            var newExpense = Manager.instance.getTotalExpense(currentMonth: currentMonth)
             newExpense += Double(thisBudget.valField)!
             newExpense = round(newExpense * 100) / 100
-            totalExpense.updateValue(newExpense, forKey: currentMonth)
+            Manager.instance.setTotalExpense(totalExpense: newExpense, currentMonth: currentMonth)
             
         }
         
-        totalBudget[currentMonth] = totalIncome[currentMonth]! - totalExpense[currentMonth]!
-        totalBudget[currentMonth] = round(totalBudget[currentMonth]! * 100) / 100
- 
-        let ret : [Double] = [totalIncome[currentMonth]!, totalExpense[currentMonth]!, totalBudget[currentMonth]!]
-        return ret
+        var newTotalBudget = Manager.instance.getTotalIncome(currentMonth: currentMonth) - Manager.instance.getTotalExpense(currentMonth: currentMonth)
+
+        newTotalBudget = round(newTotalBudget * 100) / 100
+        Manager.instance.setTotalBudget(totalBudget: newTotalBudget, currentMonth: currentMonth)
+
+        
     }
     
     func subtractBudget(thisBudget: budgetData) {
         
         if (type == "Income") {
-            var newIncome = totalIncome[currentMonth]!
+            var newIncome = Manager.instance.getTotalIncome(currentMonth: currentMonth)
             newIncome -= Double(thisBudget.valField)!
             newIncome = round(newIncome * 100) / 100
-            totalIncome.updateValue(newIncome, forKey: currentMonth)
+            Manager.instance.setTotalIncome(totalIncome: newIncome, currentMonth: currentMonth)
             
         } else if (type == "Expense") {
-            var newExpense = totalExpense[currentMonth]!
+            var newExpense = Manager.instance.getTotalExpense(currentMonth: currentMonth)
             newExpense -= Double(thisBudget.valField)!
             newExpense = round(newExpense * 100) / 100
-            totalExpense.updateValue(newExpense, forKey: currentMonth)
+            Manager.instance.setTotalExpense(totalExpense: newExpense, currentMonth: currentMonth)
             
         }
         
-        totalBudget[currentMonth] = totalIncome[currentMonth]! - totalExpense[currentMonth]!
-        totalBudget[currentMonth] = round(totalBudget[currentMonth]! * 100) / 100
+        var newTotalBudget = Manager.instance.getTotalIncome(currentMonth: currentMonth) - Manager.instance.getTotalExpense(currentMonth: currentMonth)
+        newTotalBudget = round(newTotalBudget * 100) / 100
+        
+        Manager.instance.setTotalBudget(totalBudget: newTotalBudget, currentMonth: currentMonth)
         
         
     }
@@ -266,18 +257,17 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     // update View
     
     func updateBudgetView() {
-        totalIncomeLbl?.text = "+\(totalIncome[currentMonth]!)"
-        totalExpenseLbl?.text = "-\(totalExpense[currentMonth]!)"
-        if (totalBudget[currentMonth]! >= 0) {
-            totalBudgetLbl?.text = "+\(totalBudget[currentMonth]!)"
+        totalIncomeLbl?.text = "+\(Manager.instance.getTotalIncome(currentMonth: currentMonth))"
+        totalExpenseLbl?.text = "-\(Manager.instance.getTotalExpense(currentMonth: currentMonth))"
+        if (Manager.instance.getTotalBudget(currentMonth: currentMonth) >= 0) {
+            totalBudgetLbl?.text = "+\(Manager.instance.getTotalBudget(currentMonth: currentMonth))"
         }
         else {
-            totalBudgetLbl?.text = "\(totalBudget[currentMonth]!)"
+            totalBudgetLbl?.text = "\(Manager.instance.getTotalBudget(currentMonth: currentMonth))"
         }
     }
- 
-
-
-
+    
+    
+    
+    
 }
-
